@@ -74,10 +74,11 @@ def test_prompt_contains_passages_and_citation_rules(engine, monkeypatch):
 def test_model_from_env_var_and_no_fallback_for_other_models(engine, monkeypatch):
     monkeypatch.setenv("HYBRIDRAG_MODEL", "claude-haiku-4-5")
     client = FakeClient(text="x [d1]")
-    result = answer("sleep memory", engine=engine, client=client)
+    result = answer("sleep memory", engine=engine, client=client, effort=None)
     request = client.calls[0]
     assert request["model"] == "claude-haiku-4-5" == result.model
     assert "betas" not in request and "extra_body" not in request
+    assert "output_config" not in request  # effort omitted for models without it
     answer("sleep memory", engine=engine, client=client, model="claude-sonnet-5-5")
     assert client.calls[1]["model"] == "claude-sonnet-5-5"
 

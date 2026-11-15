@@ -109,7 +109,7 @@ def answer(
     engine: SearchEngine | None = None,
     client: Any = None,
     model: str | None = None,
-    effort: str = "medium",
+    effort: str | None = "medium",
     max_tokens: int = 16000,
     data_dir: str = "data",
 ) -> Answer:
@@ -123,7 +123,8 @@ def answer(
         client: an ``anthropic.Anthropic``-compatible client (default: created from the
             environment, which needs ``ANTHROPIC_API_KEY``).
         model: Claude model id (default ``$HYBRIDRAG_MODEL`` or ``claude-opus-5-5``).
-        effort: ``output_config.effort`` (low / medium / high / xhigh / max).
+        effort: ``output_config.effort`` (low / medium / high / xhigh / max); ``None`` omits
+            it, for models without effort support.
     """
     engine = engine or _default_engine(data_dir)
     hits = engine.search(question, system=system, k=k)
@@ -138,8 +139,9 @@ def answer(
         "max_tokens": max_tokens,
         "system": SYSTEM_PROMPT,
         "messages": build_messages(question, hits),
-        "output_config": {"effort": effort},
     }
+    if effort is not None:
+        request["output_config"] = {"effort": effort}
     if model in FALLBACK_MODELS:
         # On a safety refusal the API re-runs the request on a fallback model it chooses.
         request["betas"] = [FALLBACK_BETA]

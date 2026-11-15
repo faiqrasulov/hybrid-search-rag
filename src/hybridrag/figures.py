@@ -213,7 +213,7 @@ def tuning_curves(metrics: dict, path: Path) -> Path:
     )
     ax2.legend(loc="lower left", fontsize=8.5)
     ax2.axvline(rr["selected_weight"], color=INK, lw=1)
-    ax2.set_xlabel("Cross-encoder weight (0 = first stage only, 1 = cross-encoder only)")
+    ax2.set_xlabel("Cross-encoder weight (0 = first stage only, 1 = CE only)")
     ax2.set_ylabel("nDCG@10")
     ax2.set_title(
         f"Reranker weight, chosen on train: {rr['selected_weight']} (top-{rr['depth']})",

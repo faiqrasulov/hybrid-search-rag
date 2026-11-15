@@ -104,9 +104,9 @@ class DenseRetriever:
     """Exact (brute-force) cosine search over L2-normalised embeddings.
 
     One query costs a (dim x N) matrix-vector product: about 2 million multiply-adds for
-    SciFact, well under a millisecond. An approximate index (FAISS IVF/HNSW) only pays
-    off at millions of documents, where the float32 matrix itself no longer fits in RAM
-    comfortably and brute force reaches ~100 ms per query.
+    SciFact, well under a millisecond. An approximate index (FAISS IVF/HNSW) pays off from
+    about a million documents, where the float32 matrix takes ~1.5 GB and brute force costs
+    tens of milliseconds per query.
     """
 
     name = "dense"
