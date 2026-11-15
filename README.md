@@ -1,8 +1,9 @@
 # Hybrid Search RAG (`hybridrag`)
 
-A retrieval-augmented generation (RAG) system where the retrieval is **measured, not assumed**:
+The retrieval half of a retrieval-augmented generation (RAG) system, **measured, not assumed**:
 BM25 from scratch, dense embeddings, hybrid fusion and cross-encoder reranking, evaluated on the
-public BEIR SciFact benchmark, with an optional Claude answer layer that cites its sources.
+public BEIR SciFact benchmark. An answer layer for Claude that cites its sources is included; it
+is tested with a mocked client only and has not been run against the API.
 
 [![CI](https://github.com/faiqrasulov/hybrid-search-rag/actions/workflows/ci.yml/badge.svg)](https://github.com/faiqrasulov/hybrid-search-rag/actions/workflows/ci.yml)
 ![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)
@@ -133,8 +134,8 @@ nDCG@10 and 0.003 Recall@100; small
 differences in tokenisation (Lucene's standard tokenizer vs a regex) and Lucene's lossy one-byte
 encoding of document length are expected to account for that. In Lucene, indexing title and
 abstract as separate fields lowers the score: Pyserini's two-field run gets 0.665, the same as
-BEIR's Elasticsearch number. My emulation of BEIR's two-field query did **not** reproduce
-that drop (0.687); a likely reason, which I have not verified, is how Lucene
+BEIR's Elasticsearch number. An emulation of BEIR's two-field query did **not** reproduce
+that drop (0.687). The cause was not investigated; one candidate is how Lucene
 normalises the length of very short fields such as titles. Tuning k1 and b on train did not
 transfer to test, and stemming helped by +0.016 (not significant at 300
 queries, but consistent with the train split: 0.695 vs
