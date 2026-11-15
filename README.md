@@ -30,7 +30,9 @@ numbers come from `make run` and are stored in [`reports/metrics.json`](reports/
 - **Hybrid search is what moves the metric.** BM25 + MiniLM embeddings fused by a convex combination
   (dense weight 0.45, min-max normalisation, chosen on train) reach
   nDCG@10 **0.725** vs 0.683 for BM25 alone: +0.043 (95% CI [+0.025, +0.060], Holm p < 0.0001).
-  Recall@100 rises from 0.928 to 0.955.
+  Recall@100 rises from 0.928 to 0.955. Because the fusion weight is tuned on SciFact train
+  queries, 0.725 is not a zero-shot BEIR number; untuned RRF (0.716) is the figure to compare
+  with published zero-shot results.
 - **BM25 written from scratch matches Lucene.** 0.683 nDCG@10 / 0.928
   Recall@100, against 0.679 / 0.925 for Lucene BM25 on the same
   single-field setup (Pyserini). BEIR's published 0.665 comes from a
@@ -39,7 +41,8 @@ numbers come from `make run` and are stored in [`reports/metrics.json`](reports/
   20 with `ms-marco-MiniLM-L-6-v2` lowers nDCG@10 to 0.683, a change of
   -0.042 (95% CI [-0.069, -0.015], Holm p 0.015), at 29x the median latency. Interpolating its
   scores with the first stage (weight tuned on train) only brings it back to the hybrid's level
-  (0.727).
+  (0.727). The reranker reads only the first 256 tokens of each passage, which cuts off most
+  SciFact abstracts, so part of the gap may come from truncation rather than from the model.
 - **Dense retrieval alone is not enough on scientific claims**: MiniLM scores 0.648,
   below BM25 by -0.034 (95% CI [-0.070, +0.000], Holm p 0.162), yet it carries information BM25 misses: fusing the
   two beats both.
@@ -281,6 +284,12 @@ make run              # download SciFact, index, embed, tune on train, evaluate 
 make test             # 42 tests, ~3 s, no network
 ```
 
+`make install` takes the newest compatible packages. To reproduce the committed `reports/`, use
+`make install-locked` instead: it installs the versions pinned in
+[`requirements.lock`](requirements.lock) (Python 3.12). With them `make run` regenerates every retrieval
+metric, confidence interval and p-value in `reports/metrics.json` exactly; the latency figures
+depend on the machine (checked on macOS arm64).
+
 ```bash
 hybridrag search "statins reduce the risk of heart attack" --system hybrid -k 5
 hybridrag search "statins reduce the risk of heart attack" --system rerank
@@ -323,7 +332,7 @@ tests/           42 pytest tests (fake encoder and reranker, mocked Anthropic cl
   several times longer; it was left out to keep `make run` within its time budget. Next: add it
   (embeddings are cached after the first run) and test biomedical encoders.
 - **Reranker depth and length.** The cross-encoder sees only the top 20 candidates
-  truncated to 256 tokens, to fit the CPU budget. An in-domain or LLM reranker is the obvious next
+  truncated to 256 tokens, to fit the CPU budget; most abstracts are longer than that. An in-domain or LLM reranker is the obvious next
   experiment.
 - **The answer layer is not evaluated.** No paid API calls were made. SciFact also labels whether
   each abstract supports or refutes a claim and marks rationale sentences, which would allow
