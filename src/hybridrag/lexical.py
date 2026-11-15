@@ -136,3 +136,14 @@ class TfidfCosine(_SparseRetriever):
         cls, documents: Sequence[str], tokenizer: Callable[[str], list[str]] | None = None
     ) -> TfidfCosine:
         return cls(TermCounts(documents, tokenizer or Tokenizer()))
+
+
+def best_fields(field_scores: Sequence[np.ndarray], tie_breaker: float = 0.5) -> np.ndarray:
+    """Elasticsearch ``multi_match`` ``best_fields`` combination of per-field scores:
+    the best field's score plus ``tie_breaker`` times the sum of the other fields' scores.
+
+    BEIR's BM25 baseline queries title and abstract as two fields this way.
+    """
+    stacked = np.stack([np.asarray(s, dtype=np.float64) for s in field_scores])
+    best = stacked.max(axis=0)
+    return best + tie_breaker * (stacked.sum(axis=0) - best)

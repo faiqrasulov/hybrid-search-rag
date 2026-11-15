@@ -93,3 +93,12 @@ def test_term_counts_drop_out_of_vocabulary_query_terms():
     q = counts.queries(["b b zzz", "zzz"]).toarray()
     assert q[0, counts.vocab["b"]] == 2 and q.sum() == 2
     assert counts.matrix.toarray()[0, counts.vocab["b"]] == 2
+
+
+def test_best_fields_combination():
+    from hybridrag.lexical import best_fields
+
+    title = np.array([[2.0, 0.0, 1.0]])
+    body = np.array([[1.0, 3.0, 1.0]])
+    np.testing.assert_allclose(best_fields([title, body], 0.5), [[2.5, 3.0, 1.5]])
+    np.testing.assert_allclose(best_fields([title, body], 1.0), title + body)

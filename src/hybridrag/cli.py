@@ -8,6 +8,8 @@ import sys
 import textwrap
 from collections.abc import Sequence
 
+from threadpoolctl import threadpool_limits
+
 from .engine import SYSTEMS, Hit, SearchEngine
 
 
@@ -114,7 +116,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    return args.func(args)
+    # one BLAS thread: numpy's and PyTorch's thread pools otherwise oversubscribe the CPU
+    with threadpool_limits(limits=1, user_api="blas"):
+        return args.func(args)
 
 
 if __name__ == "__main__":

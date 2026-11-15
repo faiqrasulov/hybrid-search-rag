@@ -17,8 +17,8 @@ from .text import Tokenizer
 SYSTEMS = ("tfidf", "bm25", "dense", "rrf", "hybrid", "rerank")
 # Dense weight and normalisation of the convex hybrid, tuned on the SciFact *train* split by
 # `make run` (see reports/metrics.json -> fusion_tuning).
-DEFAULT_DENSE_WEIGHT = 0.35
-DEFAULT_NORMALIZATION = "zscore"
+DEFAULT_DENSE_WEIGHT = 0.45
+DEFAULT_NORMALIZATION = "minmax"
 DEFAULT_CANDIDATES = 100  # top-k taken from each first-stage retriever
 DEFAULT_RERANK_DEPTH = 20
 DEFAULT_RERANK_BASE = "hybrid"  # first stage under the reranker (best on train nDCG@10)
